@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+/* 自定义字体样式 */
+@font-face {
+  font-family: 'CustomFont';
+  src: var(--font-custom-url) format(var(--font-custom-format));
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 卡片内容样式 */
+.card-content-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.card-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.card-content th,
+.card-content td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.card-content th {
+  background-color: #f2f2f2;
+}
+
+.card-content blockquote {
+  border-left: 4px solid #ccc;
+  padding-left: 10px;
+  margin-left: 0;
+  color: #555;
+}
+
+.card-content pre {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+/* 暗色主题样式 */
+[data-theme="dark"] .card-content th,
+[data-theme="dark"] .card-content td {
+  border-color: #555;
+}
+
+[data-theme="dark"] .card-content th {
+  background-color: #444;
+}
+
+[data-theme="dark"] .card-content blockquote {
+  border-left-color: #666;
+  color: #bbb;
+}
+
+[data-theme="dark"] .card-content pre {
+  background-color: #2d2d2d;
+}
+
+[data-theme="dark"] .card-content hr {
+  border-top-color: #555;
+}
+
+.card-content code {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.card-content hr {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 20px 0;
+}

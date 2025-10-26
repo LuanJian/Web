@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YM</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding-top: 60px;
+            overflow-x: hidden;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 0;
+            overflow-x: auto;
+            white-space: nowrap;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .nav-list {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+        }
+        .nav-link {
+            display: block;
+            padding: 16px 20px;
+            text-decoration: none;
+            color: #586069;
+            font-size: 0.95em;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #0366d6;
+            background-color: #f6f8fa;
+        }
+        .nav-link.active {
+            color: #0366d6;
+            border-bottom-color: #0366d6;
+        }
+        .content-area {
+            padding: 20px;
+            max-width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
+        .page { display: none; }
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.2em;
+            color: #24292e;
+            font-weight: 600;
+        }
+        .card p {
+            margin: 0 0 12px 0;
+            font-size: 0.95em;
+            color: #586069;
+            line-height: 1.6;
+        }
+        .command-box {
+            background: #f6f8fa;
+            border-radius: 6px;
+            padding: 12px 15px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            position: relative;
+            word-break: break-all;
+            border: 1px solid #e1e4e8;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #0366d6;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover { background: #035fc7; }
+        .download-btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            margin: 4px 4px 4px 0;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            background: #22863a;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .warning {
+            background: #fff8e6;
+            border: 1px solid #ffd36f;
+            border-radius: 6px;
+            padding: 12px 15px;
+            font-size: 0.9em;
+            color: #735c0f;
+            margin: 10px 0;
+        }
+        .command-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 15px;
+        }
+        .command-left {
+            flex: 1;
+            min-width: 0;
+            padding-right: 10px;
+        }
+        .command-right {
+            flex: 1;
+            min-width: 0;
+            padding-left: 10px;
+            border-left: 1px solid #e1e4e8;
+        }
+        .command-right .warning {
+            margin: 0;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        .software-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            table-layout: auto;
+            min-width: 100%;
+        }
+
+        .software-table th {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #0366d6;
+            border-bottom: 2px solid #e1e4e8;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .software-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e1e4e8;
+            vertical-align: top;
+            word-break: break-word;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .software-table th:nth-child(1),
+        .software-table td:nth-child(1) {
+            width: 25%;
+            min-width: 120px;
+            max-width: 200px;
+            white-space: normal;
+            font-weight: 600;
+        }
+
+        .software-table th:nth-child(2),
+        .software-table td:nth-child(2) {
+            width: 35%;
+            min-width: 200px;
+            max-width: 400px;
+            white-space: normal;
+            color: #586069;
+            font-size: 0.95em;
+        }
+
+        .software-table th:nth-child(3),
+        .software-table td:nth-child(3) {
+            width: 40%;
+            min-width: 150px;
+            white-space: nowrap;
+        }
+
+        .software-table tr:hover {
+            background: #f8f9fa;
+            transition: background 0.2s;
+        }
+
+        .software-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .software-table .download-btn {
+            margin: 2px;
+            padding: 6px 12px;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 1024px) {
+            .software-table { font-size: 0.95em; }
+            .software-table th:nth-child(1), .software-table td:nth-child(1) { width: 30%; min-width: 100px; }
+            .software-table th:nth-child(2), .software-table td:nth-child(2) { width: 40%; min-width: 150px; }
+            .software-table th:nth-child(3), .software-table td:nth-child(3) { width: 30%; min-width: 120px; }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-link { padding: 14px 16px; font-size: 0.9em; }
+            .content-area { padding: 15px; }
+            .card { padding: 16px; margin-bottom: 16px; }
+            .command-row { flex-direction: column; align-items: stretch; gap: 10px; }
+            .command-left { padding-right: 0; padding-bottom: 10px; }
+            .command-right { padding-left: 0; border-left: none; border-top: 1px solid #e1e4e8; padding-top: 10px; }
+            .command-right .warning { white-space: normal; text-align: center; }
+        }
+        
+        @media (max-width: 480px) {
+            body { padding-top: 50px; }
+            .nav-link { padding: 12px 14px; font-size: 0.85em; }
+            .content-area { padding: 12px; }
+            .card { padding: 14px; margin-bottom: 14px; }
+            .command-box { padding: 10px; }
+            .copy-btn { padding: 3px 6px; font-size: 0.7em; }
+            .software-table { font-size: 0.9em; table-layout: auto; min-width: 100%; }
+            .software-table th, .software-table td { padding: 8px 10px; word-break: break-word; font-size: 0.85em; line-height: 1.4; }
+            .software-table th:nth-child(1), .software-table td:nth-child(1) { width: 100%; display: block; padding-bottom: 5px; border-bottom: none; font-size: 1em; }
+            .software-table th:nth-child(2), .software-table td:nth-child(2) { width: 100%; display: block; padding-top: 5px; padding-bottom: 10px; border-bottom: none; font-size: 0.8em; }
+            .software-table th:nth-child(3), .software-table td:nth-child(3) { width: 100%; display: block; padding-top: 5px; text-align: center; }
+            .software-table thead { display: none; }
+            .software-table tr { display: block; margin-bottom: 15px; border: 1px solid #e1e4e8; border-radius: 8px; padding: 12px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+            .software-table td { border-bottom: none; padding: 4px 0; }
+            .software-table .download-btn { display: inline-block; margin: 2px; font-size: 0.8em; padding: 6px 12px; width: auto; min-width: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-bar">
+            <ul class="nav-list">
+                <li><a href="#software" class="nav-link active" data-page="software">软件</a></li>
+                <li><a href="#commands" class="nav-link" data-page="commands">命令</a></li>
+                <li><a href="#plugins" class="nav-link" data-page="plugins">插件</a></li>
+                <li><a href="#online" class="nav-link" data-page="online">工具</a></li>
+            </ul>
+        </nav>
+
+        <div class="content-area">
+            
+            <div class="page active" id="software">
+                <div class="card">
+                    <div style="margin-bottom: 20px;">
+                        <label for="software-filter">筛选分类：</label>
+                        <select id="software-filter" onchange="filterTable('software-table', 'software-filter')">
+                            <option value="">全部</option>
+                            <option value="激活工具">激活工具</option>
+                            <option value="文件传输">文件传输</option>
+                            <option value="效率提升">效率提升</option>
+                            <option value="压缩解压">压缩解压</option>
+                            <option value="上网浏览">上网浏览</option>
+                            <option value="影音播放">影音播放</option>
+                            <option value="效率工具">效率工具</option>
+                            <option value="系统优化">系统优化</option>
+                            <option value="系统设置">系统设置</option>
+                            <option value="文本编辑">文本编辑</option>
+                        </select>
+                    </div>
+                    <div style="overflow-x: auto; width: 100%;">
+                        <table class="software-table" id="software-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">软件名称</th>
+                                <th style="text-align: center;">功能描述</th>
+                                <th style="text-align: center;">下载地址</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-category="激活工具">
+                                <td style="text-align: center;"><strong>HEU KMS Activator</strong></td>
+                                <td style="text-align: center;">带图形化界面的 Windows + Office 全部版本激活工具</td>
+                                <td style="text-align: center;">
+                                    <a href="https://github.com/zbezj/HEU_KMS_Activator/releases/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/HEU_KMS_Activator_v63.2.0.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="版本转换">
+                                <td style="text-align: center;"><strong>Windows 10/11 版本一键转换</strong></td>
+                                <td style="text-align: center;">免重装系统，一键转换 Windows 10/11 系统版本</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.xyboot.com/windows10_ver_one_key_switch/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/系统版本一键转换 v3.0.2.2.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="版本转换">
+                                <td style="text-align: center;"><strong>OSSQ Win10-11 系统版本一键转换</strong></td>
+                                <td style="text-align: center;">免重装系统，一键转换 Windows 10/11 系统版本</td>
+                                <td style="text-align: center;">
+                                    <a href="" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/OSSQ-Win10 - Win11 系统版本 一键转换 v7.0.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="环境组件">
+                                <td style="text-align: center;"><strong>VisualCppRedist_AIO</strong></td>
+                                <td style="text-align: center;">系统运行库是 Windows 操作系统应用程序的基础类型库的可再发行程序包</td>
+                                <td style="text-align: center;">
+                                    <a href="https://github.com/abbodi1406/vcredist/releases/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/VisualCppRedist_AIO_x86_x64_v92.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="环境组件">
+                                <td style="text-align: center;"><strong>Microsoft Edge WebView2</strong></td>
+                                <td style="text-align: center;">基于 Chromium 内核构建免，主要为应用程序提供浏览器核心功能</td>
+                                <td style="text-align: center;">
+                                    <a href="https://developer.microsoft.com/zh-cn/microsoft-edge/webview2" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/WebView2 v140.0.3485.54.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统设置">
+                                <td style="text-align: center;"><strong>Windows 系统调校</strong></td>
+                                <td style="text-align: center;"></td>
+                                <td style="text-align: center;">
+                                    <a href="" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Windows 系统调校 v2025.04.14.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统设置">
+                                <td style="text-align: center;">StartAllBack<strong></strong></td>
+                                <td style="text-align: center;"></td>
+                                <td style="text-align: center;">
+                                    <a href="" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/StartAllBack3.9.15.5310-Stbale-Repack.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统设置">
+                                <td style="text-align: center;">WinRAR<strong></strong></td>
+                                <td style="text-align: center;"></td>
+                                <td style="text-align: center;">
+                                    <a href="" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/WinRAR.zip" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文件传输">
+                                <td style="text-align: center;"><strong>LocalSend</strong></td>
+                                <td style="text-align: center;">适用于内网文件分享的全平台的文件传输工具</td>
+                                <td style="text-align: center;">
+                                    <a href="https://github.com/localsend/localsend/releases/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/LocalSend-1.17.0-windows-x86-64.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="效率提升">
+                                <td style="text-align: center;"><strong>Everything</strong></td>
+                                <td style="text-align: center;">基于名称快速定位文件和文件夹的检索工具</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.voidtools.com/zh-cn/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Everything-1.4.1.1028.x64-Setup.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="压缩解压">
+                                <td style="text-align: center;"><strong>7-Zip</strong></td>
+                                <td style="text-align: center;">开源的文件压缩与解压缩软件</td>
+                                <td style="text-align: center;">
+                                    <a href="https://7-zip.org/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/7z2501-x64.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文件下载">
+                                <td style="text-align: center;"><strong>Neat Download Manager</strong></td>
+                                <td style="text-align: center;">能够替代 IDM 的免费多线程下载器，支持 Windows、macOS 双平台</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.neatdownloadmanager.com/index.php/en/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/NDM.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文件下载">
+                                <td style="text-align: center;"><strong>Mocreak</strong></td>
+                                <td style="text-align: center;">一键自动化、无人值守下载、安装、部署 Office 的利器</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.mocreak.com/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Mocreak v2.4.1.407.rar" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文件下载">
+                                <td style="text-align: center;"><strong>Office 2013-2024 C2R Install</strong></td>
+                                <td style="text-align: center;">自定义部署 Office 的便捷工具</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.mocreak.com/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Office 2013-2024 C2R Install v7.7.7.7 x86.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="上网浏览">
+                                <td style="text-align: center;"><strong>Cent Browser</strong></td>
+                                <td style="text-align: center;">工作使用的浏览器，简约实用可以安装插件</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.centbrowser.cn/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/centbrowser_5.2.1168.75_x64.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="上网浏览">
+                                <td style="text-align: center;"><strong>夸克浏览器</strong></td>
+                                <td style="text-align: center;">日常使用的浏览器，内置夸克网盘，可同步标签</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.quark.cn/" class="download-btn">软件官网</a>
+                                    <a href="" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="图像浏览">
+                                <td style="text-align: center;"><strong>FastStone Image Viewer</strong></td>
+                                <td style="text-align: center;">快速、稳定、用户友好的图像浏览器、转换器和编辑器</td>
+                                <td style="text-align: center;">
+                                    <a href="http://www.faststone.org/FSViewerDetail.htm" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/QXEQE-RWMIM-PKVNU-FSYPV.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="影音播放">
+                                <td style="text-align: center;"><strong>完美解码</strong></td>
+                                <td style="text-align: center;">本地视频播放器，内置强大的解码器</td>
+                                <td style="text-align: center;">
+                                    <a href="https://jm.wmzhe.com/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/完美解码 v2025.07.30.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="影音播放">
+                                <td style="text-align: center;"><strong>Alger Music Player</strong></td>
+                                <td style="text-align: center;">内置音源的在线音乐播放器，支持音乐下载</td>
+                                <td style="text-align: center;">
+                                    <a href="https://github.com/algerkong/AlgerMusicPlayer/releases/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/AlgerMusicPlayer-4.9.0-win-x64.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="屏幕录制">
+                                <td style="text-align: center;"><strong>Bandicam</strong></td>
+                                <td style="text-align: center;">切勿商用，支持录制屏幕、摄像头、麦克风</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.bandicam.cn/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Bandicam v8.2.0.2523 Lite.7z" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="效率工具">
+                                <td style="text-align: center;"><strong>Escrcpy</strong></td>
+                                <td style="text-align: center;">支持 Android 设备无线投屏与控制工具，提供镜像、录屏等功能</td>
+                                <td style="text-align: center;">
+                                    <a href="https://github.com/viarotel-org/escrcpy/releases/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Escrcpy-1.30.2-win-setup-x64.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统优化">
+                                <td style="text-align: center;"><strong>Mem Reduct</strong></td>
+                                <td style="text-align: center;">系统内存自动清理工具，可自定义清理时间、根据占用情况清理</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.henrypp.org/product/memreduct" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Mem Reduct v3.5.2.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统优化">
+                                <td style="text-align: center;"><strong>WizTree</strong></td>
+                                <td style="text-align: center;">磁盘空间文件分析工具，可查看文件占用空间大小，删除无用大体积文件</td>
+                                <td style="text-align: center;">
+                                    <a href="https://diskanalyzer.com/?ref=wiztree" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/WizTree v4.2.6.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统优化">
+                                <td style="text-align: center;"><strong>360驱动大师-网卡版</strong></td>
+                                <td style="text-align: center;">仅适合在 Windows 10 以下系统中使用，可离线查看驱动信息，修复驱动</td>
+                                <td style="text-align: center;">
+                                    <a href="https://dm.weishi.360.cn/home.html" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/360驱动大师 v2.0.0.2050 网卡版.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统设置">
+                                <td style="text-align: center;"><strong>傲梅分区助手</strong></td>
+                                <td style="text-align: center;">磁盘分区大小调整，调整 C 盘大小，删除分区，合并分区</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.disktool.cn/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/分区助手 v10.8.1 Lite.7z" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统设置">
+                                <td style="text-align: center;"><strong>Firewall App Blocker</strong></td>
+                                <td style="text-align: center;">防火墙应用阻止器，可阻止指定应用的网络访问</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.sordum.org/8125/firewall-app-blocker-fab-v1-9/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Firewall App Blocker v1.9.zip" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统设置">
+                                <td style="text-align: center;"><strong>Windows Update Blocker</strong></td>
+                                <td style="text-align: center;">禁用或启用 Windows 系统上的自动更新</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.sordum.org/9470/windows-update-blocker-v1-8/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Windows Update blocker v1.8.zip" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统清理">
+                                <td style="text-align: center;"><strong>HiBit Uninstaller</strong></td>
+                                <td style="text-align: center;">软件卸载工具，可卸载大部分软件，支持卸载残留文件，清理注册表</td>
+                                <td style="text-align: center;">
+                                    <a href="https://www.hibitsoft.ir/Uninstaller.html" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/HiBit Uninstaller v3.2.55.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统清理">
+                                <td style="text-align: center;"><strong>My Computer Manager</strong></td>
+                                <td style="text-align: center;">管理“此电脑”里删不掉的流氓“快捷方式”（包括侧边栏），同时可自己添加这类“快捷方式”</td>
+                                <td style="text-align: center;">
+                                    <a href="https://github.com/1357310795/MyComputerManager/releases/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/MyComputerManager v1.0.3.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文本编辑">
+                                <td style="text-align: center;"><strong>Notepad--</strong></td>
+                                <td style="text-align: center;">替代记事本的文本编辑器，功能丰富，支持多标签、插件、对比等功能</td>
+                                <td style="text-align: center;">
+                                    <a href="https://gitee.com/cxasm/notepad--/releases/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Notepad--v3.5.1-plugin-Installer.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文本编辑">
+                                <td style="text-align: center;"><strong>Microsoft Office 2013 x64</strong></td>
+                                <td style="text-align: center;">切勿商用，内置 KMS 无需单独激活就可使用的 Office 套件</td>
+                                <td style="text-align: center;">
+                                    <a href="" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Office 2013 x64 KMS.iso" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文本编辑">
+                                <td style="text-align: center;"><strong>Microsoft Office 2013 x86</strong></td>
+                                <td style="text-align: center;">切勿商用，内置 KMS 无需单独激活就可使用的 Office 套件</td>
+                                <td style="text-align: center;">
+                                    <a href="" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/Office 2013 x86 KMS.iso" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="文本输入">
+                                <td style="text-align: center;"><strong>搜狗输入法</strong></td>
+                                <td style="text-align: center;">仅适合在 Windows 10 以下系统中安装使用</td>
+                                <td style="text-align: center;">
+                                    <a href="https://shurufa.sogou.com/windows/" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/搜狗输入法 v6.7 v2 Lite.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统维护">
+                                <td style="text-align: center;"><strong>FirPE</strong></td>
+                                <td style="text-align: center;">Windows PE 系统预安装环境，内置网络管理器，能够联网使用</td>
+                                <td style="text-align: center;">
+                                    <a href="https://firpe.cn/page-247" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/FirPE-V2.0.3.exe" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                            <tr data-category="系统维护">
+                                <td style="text-align: center;"><strong>EasyRC</strong></td>
+                                <td style="text-align: center;">Windows 系统重装软件，是当前最简单最快速的系统重装软件</td>
+                                <td style="text-align: center;">
+                                    <a href="https://firpe.cn/page-196" class="download-btn">软件官网</a>
+                                    <a href="./SoftWare/EasyRC一键装机V3.7.5_完整离线版_带网络.7z" class="download-btn">本地下载</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+
+                        <div class="page" id="commands">
+            <div class="card">
+                <h3>Windows 激活 ( <a href="https://massgrave.dev/" target="_blank" style="color: #0366d6; text-decoration: none;">MAS</a> )</h3>
+                <div class="command-row">
+                    <div class="command-left">
+                        <div class="command-box">
+                            irm https://get.activated.win | iex
+                            <button class="copy-btn" onclick="copyCommand(this)">复制</button>
+                        </div>
+                    </div>
+                    <div class="command-right">
+                        <div class="warning">⚠️ 以管理员身份运行 PowerShell</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Jetbrains 激活 ( <a href="https://ckey.run/" target="_blank" style="color: #0366d6; text-decoration: none;">CodeKey</a> )</h3>
+                <div class="command-row">
+                    <div class="command-left">
+                        <div class="command-box">
+                            irm ckey.run | iex
+                            <button class="copy-btn" onclick="copyCommand(this)">复制</button>
+                        </div>
+                    </div>
+                    <div class="command-right">
+                        <div class="warning">⚠️ 适用于 Windows 平台的所有 Jetbrains 系列软件的激活</div>
+                    </div>
+                </div>
+                
+                <div class="command-row">
+                    <div class="command-left">
+                        <div class="command-box">
+                            curl -Ls ckey.run -o ckey.run && bash ckey.run
+                            <button class="copy-btn" onclick="copyCommand(this)">复制</button>
+                        </div>
+                    </div>
+                    <div class="command-right">
+                        <div class="warning">⚠️ 适用于 macOS 平台的所有 Jetbrains 系列软件的激活</div>
+                    </div>
+                </div>
+                
+                <div class="command-row">
+                    <div class="command-left">
+                        <div class="command-box">
+                            wget -q ckey.run -O ckey.run && bash ckey.run
+                            <button class="copy-btn" onclick="copyCommand(this)">复制</button>
+                        </div>
+                    </div>
+                    <div class="command-right">
+                        <div class="warning">⚠️ 适用于 Linux 平台的所有 Jetbrains 系列软件的激活</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="page" id="plugins">
+                <div class="card">
+                    <div style="margin-bottom: 20px;">
+                        <label for="plugins-filter">筛选分类：</label>
+                        <select id="plugins-filter" onchange="filterTable('plugins-table', 'plugins-filter')">
+                            <option value="">全部</option>
+                            <option value="插件下载">插件下载</option>
+                            <option value="脚本管理">脚本管理</option>
+                            <option value="实用工具">实用工具</option>
+                            <option value="媒体播放">媒体播放</option>
+                        </select>
+                    </div>
+                    <div style="overflow-x: auto; width: 100%;">
+                    <table class="software-table" id="plugins-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">插件名称</th>
+                                <th style="text-align: center;">功能描述</th>
+                                <th style="text-align: center;">获取方式</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-category="插件下载">
+                                <td style="text-align: center;"><strong>CRX 搜搜</strong></td>
+                                <td style="text-align: center;">国内的 Chrome 插件下载平台，提供海量扩展程序</td>
+                                <td style="text-align: center;"><a href="https://www.crxsoso.com/" class="download-btn" target="_blank">插件官网</a></td>
+                            </tr>
+                            <tr data-category="插件下载">
+                                <td style="text-align: center;"><strong>CRX Download</strong></td>
+                                <td style="text-align: center;">国外的 Chrome 插件下载平台，提供海量扩展程序</td>
+                                <td style="text-align: center;"><a href="https://crxdl.com/" class="download-btn" target="_blank">插件官网</a></td>
+                            </tr>
+                            <tr data-category="插件下载">
+                                <td style="text-align: center;"><strong>Get CRX</strong></td>
+                                <td style="text-align: center;">支持获取 .crx 格式的 Chrome 插件</td>
+                                <td style="text-align: center;"><a href="https://chrome.google.com/webstore/detail/dijpllakibenlejkbajahncialkbdkjc" class="download-btn" target="_blank">插件商店</a></td>
+                            </tr>
+                            <tr data-category="脚本管理">
+                                <td style="text-align: center;"><strong>脚本猫</strong></td>
+                                <td style="text-align: center;">新一代用户脚本管理器，兼容 Tampermonkey</td>
+                                <td style="text-align: center;"><a href="https://docs.scriptcat.org/" class="download-btn" target="_blank">插件官网</a></td>
+                            </tr>
+                            <tr data-category="脚本管理">
+                                <td style="text-align: center;"><strong>Tampermonkey</strong></td>
+                                <td style="text-align: center;">用户脚本管理器，可自定义网站功能和外观</td>
+                                <td style="text-align: center;"><a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" class="download-btn" target="_blank">插件商店</a></td>
+                            </tr>
+                            <tr data-category="实用工具">
+                                <td style="text-align: center;"><strong>腾讯翻译</strong></td>
+                                <td style="text-align: center;">智能网页翻译工具，支持多语言实时翻译</td>
+                                <td style="text-align: center;"><a href="https://transmart.qq.com/zh-CN/download" class="download-btn" target="_blank">插件官网</a></td>
+                            </tr>
+                            <tr data-category="实用工具">
+                                <td style="text-align: center;"><strong>uBlock Origin</strong></td>
+                                <td style="text-align: center;">高效广告拦截器，轻量级且可自定义过滤规则</td>
+                                <td style="text-align: center;"><a href="https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm" class="download-btn" target="_blank">插件商店</a></td>
+                            </tr>
+                            <tr data-category="媒体播放">
+                                <td style="text-align: center;"><strong>猫抓</strong></td>
+                                <td style="text-align: center;">网络媒体资源嗅探工具，支持视频音频下载</td>
+                                <td style="text-align: center;"><a href="https://chrome.google.com/webstore/detail/%E7%8C%AB%E7%88%AC/cat-catch/jaedgjhcpcevcijbdpdjdjfklhifgahj" class="download-btn" target="_blank">插件商店</a></td>
+                            </tr>
+                            <tr data-category="媒体播放">
+                                <td style="text-align: center;"><strong>Native HLS Playback</strong></td>
+                                <td style="text-align: center;">直接在线播放 M3U8 视频</td>
+                                <td style="text-align: center;"><a href="https://chrome.google.com/webstore/detail/emnphkkblegpebimobpbekeedfgemhof" class="download-btn" target="_blank">插件商店</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="online">
+                <div class="card">
+                    <div style="margin-bottom: 20px;">
+                        <label for="online-filter">筛选分类：</label>
+                        <select id="online-filter" onchange="filterTable('online-table', 'online-filter')">
+                            <option value="">全部</option>
+                            <option value="观影网站">观影网站</option>
+                            <option value="网盘搜索">网盘搜索</option>
+                            <option value="资源搜索">资源搜索</option>
+                            <option value="音乐下载">音乐下载</option>
+                            <option value="电子书">电子书资源</option>
+                        </select>
+                    </div>
+                    <div style="overflow-x: auto; width: 100%;">
+                    <table class="software-table" id="online-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">网站名称</th>
+                                <th style="text-align: center;">功能描述</th>
+                                <th style="text-align: center;">访问地址</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-category="观影网站">
+                                <td style="text-align: center;"><strong>观影</strong></td>
+                                <td style="text-align: center;">在线视频观看网站，需要注册登录才能访问</td>
+                                <td style="text-align: center;"><a href="https://www.gying.in/" class="download-btn" target="_blank">访问网站</a></td>
+                            </tr>
+                            <tr data-category="观影网站">
+                                <td style="text-align: center;"><strong>低端影视</strong></td>
+                                <td style="text-align: center;">在线视频观看网站，内容较少，但质量高</td>
+                                <td style="text-align: center;"><a href="https://ddys.pro/" class="download-btn" target="_blank">访问网站</a></td>
+                            </tr>
+                            <tr data-category="观影网站">
+                                <td style="text-align: center;"><strong>易搜</strong></td>
+                                <td style="text-align: center;">需要注册登录才能使用的网盘搜索网站</td>
+                                <td style="text-align: center;"><a href="https://yiso.fun/" class="download-btn" target="_blank">访问网站</a></td>
+                            </tr>
+                            <tr data-category="观影网站">
+                                <td style="text-align: center;"><strong>SeedHub</strong></td>
+                                <td style="text-align: center;">免登录但只提供磁力和网盘的视频网站</td>
+                                <td style="text-align: center;"><a href="https://www.seedhub.cc/" class="download-btn" target="_blank">访问网站</a></td>
+                            </tr>
+                            <tr data-category="在线下载">
+                                <td style="text-align: center;"><strong>音乐魔石</strong></td>
+                                <td style="text-align: center;">免费的音乐下载网站</td>
+                                <td style="text-align: center;"><a href="https://yym4.com/" class="download-btn" target="_blank">访问网站</a></td>
+                            </tr>
+                            <tr data-category="在线下载">
+                                <td style="text-align: center;"><strong>SaltyLeo 书架</strong></td>
+                                <td style="text-align: center;">免费的电子书下载网站</td>
+                                <td style="text-align: center;"><a href="https://book.tstrs.me/" class="download-btn" target="_blank">访问网站</a></td>
+                            </tr>
+                            <tr data-category="在线下载">
+                                <td style="text-align: center;"><strong>读书派</strong></td>
+                                <td style="text-align: center;">免费的电子书下载网站</td>
+                                <td style="text-align: center;"><a href="https://www.dushupai.com/" class="download-btn" target="_blank">访问网站</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script>
+        function initNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const targetPage = link.getAttribute('data-page');
+                    if (targetPage === 'home') {
+                        location.reload(true);
+                        return;
+                    }
+                    
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    pages.forEach(p => p.classList.remove('active'));
+                    
+                    link.classList.add('active');
+                    document.getElementById(targetPage).classList.add('active');
+                });
+            });
+        }
+
+        function copyCommand(button) {
+            const commandBox = button.parentElement;
+            const text = commandBox.textContent.replace('复制', '').trim();
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    button.textContent = '已复制';
+                    setTimeout(() => button.textContent = '复制', 1000);
+                });
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                button.textContent = '已复制';
+                setTimeout(() => button.textContent = '复制', 1000);
+            }
+        }
+
+        let mediaFiles = [];
+
+        async function loadMediaFromDirectory() {
+            try {
+                showMediaLoading(true);
+                showMediaError('');
+                
+                const response = await fetch('./Media/');
+                if (!response.ok) {
+                    throw new Error('无法访问Media目录');
+                }
+                
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                
+
+                const links = doc.querySelectorAll('a');
+                const files = [];
+                const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                const videoExtensions = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm4v'];
+                
+                for (const link of links) {
+                    const fileName = link.textContent.trim();
+                    if (fileName === '../' || fileName === 'Parent Directory') continue;
+                    
+                    const extension = fileName.split('.').pop().toLowerCase();
+                    const fileUrl = `./Media/${encodeURIComponent(fileName)}`;
+                    
+                    if (imageExtensions.includes(extension)) {
+                        files.push({
+                            type: 'image',
+                            url: fileUrl
+                        });
+                    } else if (videoExtensions.includes(extension)) {
+                        files.push({
+                            type: 'video',
+                            url: fileUrl
+                        });
+                    }
+                }
+                
+                mediaFiles = files;
+                displayMediaFiles();
+                showMediaContainer(true);
+                
+                if (files.length === 0) {
+                    showMediaError('Media目录中没有找到支持的媒体文件（图片或视频）');
+                }
+                
+            } catch (error) {
+                showMediaError('加载媒体文件失败：' + error.message);
+            } finally {
+                showMediaLoading(false);
+            }
+        }
+
+        function displayMediaFiles() {
+            const grid = document.getElementById('media-grid');
+            grid.innerHTML = '';
+            const filteredFiles = filterMediaFiles();
+            if (filteredFiles.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #666;">没有找到媒体文件</div>';
+                return;
+            }
+            filteredFiles.forEach(file => {
+                grid.appendChild(createMediaItem(file));
+            });
+        }
+
+        function filterMediaFiles() {
+            const showImages = document.getElementById('filter-images').checked;
+            const showVideos = document.getElementById('filter-videos').checked;
+            return mediaFiles.filter(file => {
+                if (file.type === 'image' && showImages) return true;
+                if (file.type === 'video' && showVideos) return true;
+                return false;
+            });
+        }
+
+        function createMediaItem(file) {
+            const item = document.createElement('div');
+            item.className = 'media-item';
+            item.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; transition: transform 0.2s; overflow: hidden;';
+            item.onmouseover = () => item.style.transform = 'scale(1.05)';
+            item.onmouseout = () => item.style.transform = 'scale(1)';
+            if (file.type === 'image') {
+                const img = document.createElement('img');
+                img.src = file.url;
+                img.style.cssText = 'width: 100%; height: 180px; object-fit: cover; display: block;';
+                img.onerror = () => item.style.display = 'none';
+                item.appendChild(img);
+            } else {
+                const video = document.createElement('video');
+                video.src = file.url;
+                video.style.cssText = 'width: 100%; height: 180px; object-fit: cover; display: block;';
+                video.muted = true;
+                video.onerror = () => item.style.display = 'none';
+                item.appendChild(video);
+            }
+            item.onclick = () => openMediaPreview(file);
+            return item;
+        }
+
+        function openMediaPreview(file) {
+            const modal = document.getElementById('media-preview-modal');
+            const imagePreview = document.getElementById('preview-image');
+            const videoPreview = document.getElementById('preview-video');
+            imagePreview.style.display = 'none';
+            videoPreview.style.display = 'none';
+            if (file.type === 'image') {
+                const img = new Image();
+                img.onload = () => {
+                    imagePreview.src = file.url;
+                    imagePreview.style.display = 'block';
+                    videoPreview.style.display = 'none';
+                    modal.style.opacity = '0';
+                    modal.style.display = 'block';
+                    setTimeout(() => modal.style.opacity = '1', 10);
+                };
+                img.onerror = () => {
+                    modal.style.display = 'block';
+                    modal.style.opacity = '1';
+                };
+                img.src = file.url;
+            } else {
+                videoPreview.src = file.url;
+                videoPreview.style.display = 'block';
+                imagePreview.style.display = 'none';
+                modal.style.opacity = '0';
+                modal.style.display = 'block';
+                setTimeout(() => modal.style.opacity = '1', 10);
+            }
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMediaPreview(event) {
+            if (event) event.stopPropagation();
+            const modal = document.getElementById('media-preview-modal');
+            const imagePreview = document.getElementById('preview-image');
+            const videoPreview = document.getElementById('preview-video');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                imagePreview.src = '';
+                videoPreview.src = '';
+                videoPreview.pause();
+                videoPreview.currentTime = 0;
+            }, 300);
+        }
+
+        function filterMedia() {
+            displayMediaFiles();
+        }
+
+        function showMediaLoading(show) {
+            document.getElementById('media-loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showMediaError(message) {
+            const errorDiv = document.getElementById('media-error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = message ? 'block' : 'none';
+        }
+
+        function showMediaContainer(show) {
+            document.getElementById('media-container').style.display = show ? 'block' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initNavigation();
+        });
+
+        function filterTable(tableId, filterId) {
+            const table = document.getElementById(tableId);
+            const filter = document.getElementById(filterId);
+            const selectedCategory = filter.value;
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const category = row.getAttribute('data-category');
+                row.style.display = (selectedCategory === '' || category === selectedCategory) ? '' : 'none';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', initNavigation);
+    </script>
+</body>
+</html>
